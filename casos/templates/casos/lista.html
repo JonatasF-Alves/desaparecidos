@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block titulo %}Casos publicados | Pessoas desaparecidas{% endblock %}
+{% block conteudo %}
+<section class="hero">
+  <span class="eyebrow">Informação que aproxima</span>
+  <h1>Ajude a encontrar<br>quem está desaparecido.</h1>
+  <p class="hero-text">Consulte os casos publicados e compartilhe informações que podem ajudar uma família.</p>
+  <form method="get" class="busca" role="search">
+    <label class="sr-only" for="busca-casos">Buscar casos por nome ou cidade</label>
+    <div class="campo-busca">
+      <svg aria-hidden="true" viewBox="0 0 24 24" fill="none"><circle cx="10.8" cy="10.8" r="6.8" stroke="currentColor" stroke-width="1.8"/><path d="m16 16 4.3 4.3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+      <input id="busca-casos" name="q" placeholder="Buscar por nome ou cidade" value="{{ request.GET.q }}">
+    </div>
+    <button class="btn" type="submit">Buscar casos</button>
+    {% if request.GET.q %}<a class="limpar-busca" href="{% url 'casos:lista' %}">Limpar busca</a>{% endif %}
+  </form>
+</section>
+
+<section aria-labelledby="casos-titulo">
+  <div class="lista-heading">
+    <div>
+      <span class="eyebrow">Ajude a divulgar</span>
+      <h2 id="casos-titulo" class="section-title">Casos publicados</h2>
+    </div>
+    <span class="lista-nota">Cada compartilhamento pode fazer diferença.</span>
+  </div>
+<div class="grid">
+  {% for caso in casos %}
+  <article class="card">
+    {% if caso.foto %}
+      <img src="{{ caso.foto.url }}" alt="Foto de {{ caso.nome }}" loading="lazy">
+    {% else %}
+      <div class="foto-vazia" aria-label="Foto indisponível">Foto indisponível</div>
+    {% endif %}
+    <div class="info">
+      {% if caso.status == "encontrado" %}<span class="badge ok">Encontrado(a)</span>{% else %}<span class="badge">Desaparecido(a)</span>{% endif %}
+      <h3>{{ caso.nome }}</h3>
+      <p>{{ caso.idade }} anos <span aria-hidden="true">·</span> {{ caso.cidade }}/{{ caso.estado }}</p>
+      <p>Desaparecimento: {{ caso.data_desaparecimento|date:"d/m/Y" }}</p>
+    </div>
+    <a class="cobre" href="{% url 'casos:detalhe' caso.pk %}" aria-label="Ver caso de {{ caso.nome }}"></a>
+  </article>
+  {% empty %}
+  <div class="vazio vazio-card">
+    <strong>Nenhum caso encontrado.</strong>
+    <p>{% if request.GET.q %}Tente buscar por outro nome ou cidade.{% else %}Ainda não há casos publicados.{% endif %}</p>
+    {% if request.GET.q %}<a class="btn" href="{% url 'casos:lista' %}">Ver todos os casos</a>{% endif %}
+  </div>
+  {% endfor %}
+</div>
+{% if is_paginated %}
+<div class="paginas">
+  {% if page_obj.has_previous %}<a class="btn btn-light" href="?page={{ page_obj.previous_page_number }}{% if request.GET.q %}&amp;q={{ request.GET.q|urlencode }}{% endif %}">← Anterior</a>{% endif %}
+  <span class="pagina-atual">Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+  {% if page_obj.has_next %}<a class="btn" href="?page={{ page_obj.next_page_number }}{% if request.GET.q %}&amp;q={{ request.GET.q|urlencode }}{% endif %}">Próxima →</a>{% endif %}
+</div>
+{% endif %}
+</section>
+{% endblock %}

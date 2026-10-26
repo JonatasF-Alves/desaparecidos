@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block titulo %}Estatísticas{% endblock %}
+{% block conteudo %}
+<h1>Estatísticas</h1>
+{% if total %}
+<div class="numeros">
+  <div><strong>{{ total }}</strong>casos publicados</div>
+  <div><strong>{{ encontrados }}</strong>encontrados</div>
+  <div><strong>{{ taxa }}%</strong>taxa de resolução</div>
+  {% if tempo %}<div><strong>{{ tempo }}</strong>dias até encontrar, em média</div>{% endif %}
+</div>
+{{ g_cidade|safe }}
+{{ g_mes|safe }}
+{{ g_faixa|safe }}
+<p class="aviso">Os gráficos usam apenas totais, nunca dados de uma pessoa específica.</p>
+{% else %}
+<p class="vazio">Ainda não há casos publicados para gerar estatísticas.</p>
+{% endif %}
+{% endblock %}

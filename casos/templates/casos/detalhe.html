@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block titulo %}{{ caso.nome }}{% endblock %}
+{% block conteudo %}
+<div class="detalhe">
+  <img src="{{ caso.foto.url }}" alt="Foto de {{ caso.nome }}">
+  <div>
+    {% if caso.status == "encontrado" %}
+      <div class="faixa ok">Encontrado(a){% if caso.data_encontrado %} em {{ caso.data_encontrado|date:"d/m/Y" }}{% endif %}</div>
+    {% else %}
+      <div class="faixa">Desaparecido(a) desde {{ caso.data_desaparecimento|date:"d/m/Y" }}</div>
+    {% endif %}
+    <h1>{{ caso.nome }}</h1>
+    <ul class="dados">
+      <li><b>Idade:</b> {{ caso.idade }} anos</li>
+      <li><b>Cidade:</b> {{ caso.cidade }}/{{ caso.estado }}</li>
+      <li><b>Contato da família:</b> {{ caso.contato }}</li>
+    </ul>
+    {{ caso.descricao|linebreaks }}
+    <p class="aviso">Viu ou sabe de algo? Avise a família e ligue para o 190.</p>
+    <a class="btn ok" href="{{ whatsapp }}" target="_blank" rel="noopener">Compartilhar no WhatsApp</a>
+  </div>
+</div>
+{% endblock %}

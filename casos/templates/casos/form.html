@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block titulo %}Cadastrar caso{% endblock %}
+{% block conteudo %}
+<h1>Cadastrar caso</h1>
+<p class="aviso">Todo cadastro é analisado antes de ser publicado. Informe o número do B.O. para agilizar.</p>
+<form method="post" enctype="multipart/form-data" class="form">
+  {% csrf_token %}
+  {{ form.as_p }}
+  <button class="btn alt">Enviar para análise</button>
+</form>
+{% endblock %}
