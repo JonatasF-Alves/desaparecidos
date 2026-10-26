@@ -21,6 +21,7 @@ header .wrap{display:flex;min-height:78px;flex-wrap:wrap;gap:16px;align-items:ce
 .nav{display:flex;gap:26px;align-items:center}
 .nav a:not(.btn){color:#e3eceb;text-decoration:none;font:600 .94rem "DM Sans",Arial,sans-serif;transition:color .2s}
 .nav a:not(.btn):hover{color:#fff}
+.nav-user{color:#e3eceb;font:600 .94rem "DM Sans",Arial,sans-serif}
 main{min-height:calc(100vh - 78px);padding:36px 0 72px}
 h1{font-size:clamp(2rem,4vw,3.15rem);line-height:1.08;letter-spacing:-.045em;margin:0 0 18px;font-weight:800}
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;background:var(--ink);color:#fff;padding:11px 18px;border-radius:9px;text-decoration:none;border:0;font:700 .94rem "DM Sans",Arial,sans-serif;cursor:pointer;transition:transform .18s,background .18s,box-shadow .18s}
@@ -98,8 +99,18 @@ input::placeholder{color:#89969b}
     <span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 21s7-4.35 7-11a7 7 0 1 0-14 0c0 6.65 7 11 7 11Z" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="10" r="2.5" stroke="currentColor" stroke-width="1.8"/></svg></span>
     Pessoas desaparecidas
   </a>
-  <nav class="nav">
+    <nav class="nav">
     <a href="{% url 'analises:painel' %}">Estatísticas</a>
+    {% if user.is_authenticated %}
+      <span class="nav-user">Olá, {{ user.username }}</span>
+      <form method="post" action="{% url 'contas:logout' %}">
+        {% csrf_token %}
+        <button class="btn btn-light">Sair</button>
+      </form>
+    {% else %}
+      <a href="{% url 'contas:login' %}">Entrar</a>
+      <a href="{% url 'contas:cadastro' %}">Criar conta</a>
+    {% endif %}
     <a class="btn alt" href="{% url 'casos:cadastrar' %}">Cadastrar caso</a>
   </nav>
 </div></header>

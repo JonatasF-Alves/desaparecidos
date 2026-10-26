@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block titulo %}Entrar{% endblock %}
+{% block conteudo %}
+<h1>Entrar</h1>
+<form method="post" class="form">
+  {% csrf_token %}
+  {{ form.as_p }}
+  <button class="btn alt">Entrar</button>
+</form>
+<p class="aviso">Não tem conta? <a href="{% url 'contas:cadastro' %}">Cadastre-se</a></p>
+{% endblock %}
