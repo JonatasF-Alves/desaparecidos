@@ -43,6 +43,11 @@ class CasoCreateView(LoginRequiredMixin, CreateView):
     template_name = "casos/form.html"
     success_url = reverse_lazy("casos:lista")
 
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs["usuario"] = self.request.user
+        return kwargs    
+
     def form_valid(self, form):
         form.instance.dono = self.request.user
         messages.success(self.request, "Cadastro enviado. Ele será publicado depois da análise da equipe.")
