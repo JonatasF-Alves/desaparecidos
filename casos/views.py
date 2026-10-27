@@ -1,5 +1,10 @@
 from urllib.parse import quote
 
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import get_object_or_404, redirect
+from django.utils import timezone
+from django.views.decorators.http import require_POST
+
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Q
@@ -59,3 +64,13 @@ class MeusCasosView(LoginRequiredMixin, ListView):
 
     def get_queryset(self):
         return Caso.objects.filter(dono=self.request.user)
+
+@login_required
+@require_POST
+def marcar_encontrado(request, pk):
+    caso = get_object_or_404(Caso, pk=pk, dono=request.user)
+    caso.status = "encontrado"
+    caso.data_encontrado = timezone.localdate()
+    caso.save(update_fields=["status", "data_encontrado"])
+    messages.success(request, f"{caso.nome} foi marcado(a) como encontrado(a). Que bom!")
+    return redirect("casos:meus_casos")

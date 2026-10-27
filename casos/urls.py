@@ -8,4 +8,5 @@ urlpatterns = [
     path("caso/<int:pk>/", views.CasoDetailView.as_view(), name="detalhe"),
     path("cadastrar/", views.CasoCreateView.as_view(), name="cadastrar"),
     path("meus-casos/", views.MeusCasosView.as_view(), name="meus_casos"),
+    path("caso/<int:pk>/encontrado/", views.marcar_encontrado, name="marcar_encontrado"),
 ]

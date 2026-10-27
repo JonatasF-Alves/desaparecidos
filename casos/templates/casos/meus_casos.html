@@ -23,6 +23,14 @@
         <h3>{{ caso.nome }}</h3>
         <p>{{ caso.idade }} anos · {{ caso.cidade }}/{{ caso.estado }}</p>
         <p>Cadastrado em {{ caso.criado_em|date:"d/m/Y" }}</p>
+        {% if caso.status == "encontrado" %}
+          <span class="badge ok">Encontrado(a)</span>
+        {% elif caso.aprovado %}
+          <form method="post" action="{% url 'casos:marcar_encontrado' caso.pk %}">
+            {% csrf_token %}
+            <button class="btn ok">Marcar como encontrado(a)</button>
+          </form>
+        {% endif %}
       </div>
     </article>
     {% empty %}
