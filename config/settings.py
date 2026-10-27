@@ -33,7 +33,6 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'casos',
     'analises',
-    'contas',
     'allauth',
     'allauth.account',
 ]
