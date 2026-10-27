@@ -1,5 +1,6 @@
 from urllib.parse import quote
 
+from django.db import IntegrityError, transaction
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect
 from django.utils import timezone
@@ -11,10 +12,10 @@ from django.db.models import Q
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, DetailView, ListView
 
-from .forms import CasoForm
-from .models import Caso
+from .forms import CasoForm, DenunciaForm
+from .models import Caso, Denuncia
 
-
+LIMITE_DENUNCIAS = 100
 
 class CasoListView(ListView):
     template_name = "casos/lista.html"
@@ -74,3 +75,42 @@ def marcar_encontrado(request, pk):
     caso.save(update_fields=["status", "data_encontrado"])
     messages.success(request, f"{caso.nome} foi marcado(a) como encontrado(a). Que bom!")
     return redirect("casos:meus_casos")
+
+class DenunciarView(LoginRequiredMixin, CreateView):
+    form_class = DenunciaForm
+    template_name = "casos/denunciar.html"
+    success_url = reverse_lazy("casos:lista")
+
+    def setup(self, request, *args, **kwargs):
+        super().setup(request, *args, **kwargs)
+        self.caso = get_object_or_404(Caso, pk=kwargs["pk"], aprovado=True)
+
+    def dispatch(self, request, *args, **kwargs):
+        if request.user.is_authenticated:
+            if self.caso.dono_id == request.user.id:
+                messages.error(request, "Você não pode denunciar o seu próprio cadastro.")
+                return redirect("casos:detalhe", pk=self.caso.pk)
+            if Denuncia.objects.filter(caso=self.caso, autor=request.user).exists():
+                messages.info(request, "Você já denunciou este cadastro.")
+                return redirect("casos:detalhe", pk=self.caso.pk)
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx["caso"] = self.caso
+        return ctx
+
+    def form_valid(self, form):
+        form.instance.caso = self.caso
+        form.instance.autor = self.request.user
+        try:
+            with transaction.atomic():
+                response = super().form_valid(form)
+        except IntegrityError:
+            messages.info(self.request, "Você já denunciou este cadastro.")
+            return redirect("casos:detalhe", pk=self.caso.pk)
+
+        if self.caso.denuncias.count() >= LIMITE_DENUNCIAS:
+            Caso.objects.filter(pk=self.caso.pk).update(aprovado=False)
+        messages.success(self.request, "Denúncia enviada. Obrigado por ajudar a manter o site confiável.")
+        return response

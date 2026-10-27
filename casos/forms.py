@@ -4,7 +4,7 @@ from .turnstile import TurnstileField
 from django import forms
 from django.utils import timezone
 
-from .models import Caso
+from .models import Caso, Denuncia
 
 LIMITE_CASOS_POR_DIA = 2
 
@@ -35,5 +35,14 @@ class CasoForm(forms.ModelForm):
                 "Tente novamente mais tarde."
             )            
         return cleaned_data
+
+class DenunciaForm(forms.ModelForm):
+    class Meta:
+        model = Denuncia
+        fields = ["motivo", "detalhe"]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["cf-turnstile-response"] = TurnstileField()
 
     

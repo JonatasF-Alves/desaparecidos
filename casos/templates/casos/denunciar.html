@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block titulo %}Denunciar cadastro{% endblock %}
+{% block conteudo %}
+<h1>Denunciar cadastro</h1>
+<p class="aviso">Você está denunciando o cadastro de <b>{{ caso.nome }}</b>. A equipe vai analisar. Use só se achar que há algo errado.</p>
+<form method="post" class="form">
+  {% csrf_token %}
+  {{ form.as_p }}
+  <button class="btn alt">Enviar denúncia</button>
+</form>
+{% endblock %}

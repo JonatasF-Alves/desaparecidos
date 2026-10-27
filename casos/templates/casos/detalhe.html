@@ -18,6 +18,9 @@
     {{ caso.descricao|linebreaks }}
     <p class="aviso">Viu ou sabe de algo? Avise a família e ligue para o 190.</p>
     <a class="btn ok" href="{{ whatsapp }}" target="_blank" rel="noopener">Compartilhar no WhatsApp</a>
+    {% if user != caso.dono %}
+  <a class="btn alt" href="{% url 'casos:denunciar' caso.pk %}">Denunciar este cadastro</a>
+{% endif %}
   </div>
 </div>
 {% endblock %}
