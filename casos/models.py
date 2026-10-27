@@ -31,3 +31,34 @@ class Caso(models.Model):
 
     def __str__(self):
         return f"{self.nome} ({self.cidade})"
+
+class Denuncia(models.Model):
+    MOTIVOS = [
+        ("falso", "Cadastro falso ou golpe"),
+        ("dados", "Dados pessoais indevidos"),
+        ("duplicado", "Caso duplicado"),
+        ("outro", "Outro motivo"),
+    ]
+
+    caso = models.ForeignKey(Caso, on_delete=models.CASCADE, related_name="denuncias")
+    autor = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name="denuncias_feitas",
+    )
+    motivo = models.CharField(max_length=20, choices=MOTIVOS)
+    detalhe = models.TextField("detalhes", blank=True)
+    criado_em = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-criado_em"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["caso", "autor"],
+                name="uma_denuncia_por_usuario_por_caso",
+            )
+        ]
+
+    def __str__(self):
+        return f"Denúncia de {self.caso} ({self.get_motivo_display()})"
