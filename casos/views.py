@@ -1,12 +1,14 @@
 from urllib.parse import quote
 
 from django.contrib import messages
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Q
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, DetailView, ListView
 
 from .forms import CasoForm
 from .models import Caso
+
 
 
 class CasoListView(ListView):
@@ -36,11 +38,19 @@ class CasoDetailView(DetailView):
         return ctx
 
 
-class CasoCreateView(CreateView):
+class CasoCreateView(LoginRequiredMixin, CreateView):
     form_class = CasoForm
     template_name = "casos/form.html"
     success_url = reverse_lazy("casos:lista")
 
     def form_valid(self, form):
+        form.instance.dono = self.request.user
         messages.success(self.request, "Cadastro enviado. Ele será publicado depois da análise da equipe.")
         return super().form_valid(form)
+
+class MeusCasosView(LoginRequiredMixin, ListView):
+    template_name = "casos/meus_casos.html"
+    context_object_name = "casos"
+
+    def get_queryset(self):
+        return Caso.objects.filter(dono=self.request.user)

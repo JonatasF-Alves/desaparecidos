@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block titulo %}Meus casos | Pessoas desaparecidas{% endblock %}
+{% block conteudo %}
+<section>
+  <div class="lista-heading">
+    <div>
+      <span class="eyebrow">Sua conta</span>
+      <h1 class="section-title">Meus casos</h1>
+    </div>
+  </div>
+  <div class="grid">
+    {% for caso in casos %}
+    <article class="card">
+      {% if caso.foto %}
+        <img src="{{ caso.foto.url }}" alt="Foto de {{ caso.nome }}" loading="lazy">
+      {% endif %}
+      <div class="info">
+        {% if caso.aprovado %}
+          <span class="badge ok">Publicado</span>
+        {% else %}
+          <span class="badge">Aguardando análise</span>
+        {% endif %}
+        <h3>{{ caso.nome }}</h3>
+        <p>{{ caso.idade }} anos · {{ caso.cidade }}/{{ caso.estado }}</p>
+        <p>Cadastrado em {{ caso.criado_em|date:"d/m/Y" }}</p>
+      </div>
+    </article>
+    {% empty %}
+    <div class="vazio vazio-card">
+      <strong>Você ainda não cadastrou nenhum caso.</strong>
+      <a class="btn" href="{% url 'casos:cadastrar' %}">Cadastrar caso</a>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}
