@@ -1,6 +1,7 @@
 asgiref==3.13.0
 django==6.1.2
 django-allauth==65.21.0
+gunicorn==26.2.0
 narwhals==2.27.1
 numpy==2.5.4
 packaging==26.3
@@ -12,3 +13,4 @@ python-dotenv==1.2.4
 six==1.17.0
 sqlparse==0.6.0
 tzdata==2026.5
+whitenoise==6.12.0
