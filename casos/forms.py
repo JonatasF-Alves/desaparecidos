@@ -1,4 +1,5 @@
 from datetime import timedelta
+from .turnstile import TurnstileField
 
 from django import forms
 from django.utils import timezone
@@ -18,6 +19,7 @@ class CasoForm(forms.ModelForm):
     def __init__(self, *args, usuario=None, **kwargs):
         super().__init__(*args, **kwargs)
         self.usuario = usuario
+        self.fields["cf-turnstile-response"] = TurnstileField()
 
     def clean(self):
         cleaned_data = super().clean()
