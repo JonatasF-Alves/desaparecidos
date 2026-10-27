@@ -135,8 +135,8 @@ AUTHENTICATION_BACKENDS = [
 ACCOUNT_LOGIN_METHODS = {"username", "email"}
 ACCOUNT_SIGNUP_FIELDS = ["username*", "email*", "password1*", "password2*"]
 ACCOUNT_EMAIL_VERIFICATION = "mandatory"
+ACCOUNT_SIGNUP_FORM_CLASS = "casos.turnstile.CadastroComTurnstileForm"
 
-# Configurações de limite de cadastros por IP e por usuário
 ACCOUNT_RATE_LIMITS = {
     "signup": "5/h/ip",
 }
