@@ -2,3 +2,4 @@ django
 pillow
 pandas
 plotly
+django-allauth
