@@ -3,3 +3,4 @@ pillow
 pandas
 plotly
 django-allauth
+python-dotenv

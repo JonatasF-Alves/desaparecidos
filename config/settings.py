@@ -3,6 +3,11 @@ from pathlib import Path
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+from dotenv import load_dotenv
+import os
+
+load_dotenv(BASE_DIR / ".env")
+
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.1/howto/deployment/checklist/
@@ -139,3 +144,6 @@ ACCOUNT_RATE_LIMITS = {
 #permiti que as midias e fotos vão para as pastas certas
 MEDIA_URL = 'media/'
 MEDIA_ROOT = BASE_DIR / 'media'
+
+TURNSTILE_SITE_KEY = os.environ["TURNSTILE_SITE_KEY"]
+TURNSTILE_SECRET_KEY = os.environ["TURNSTILE_SECRET_KEY"]
