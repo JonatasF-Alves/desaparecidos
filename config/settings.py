@@ -21,6 +21,24 @@ DEBUG = os.environ.get("DJANGO_DEBUG", "False") == "True"
 
 ALLOWED_HOSTS = [h for h in os.environ.get("DJANGO_ALLOWED_HOSTS", "").split(",") if h]
 
+# --- Produção: atrás do proxy HTTPS da hospedagem ---
+# Só fica ligado quando a variável DJANGO_HTTPS for exatamente "True".
+HTTPS = os.environ.get("DJANGO_HTTPS", "False") == "True"
+
+# Origens que podem enviar formulários (ex.: https://seusite.onrender.com)
+CSRF_TRUSTED_ORIGINS = [o for o in os.environ.get("DJANGO_CSRF_TRUSTED_ORIGINS", "").split(",") if o]
+
+# Quantos proxies existem na frente do site (para o allauth ler o IP real).
+ALLAUTH_TRUSTED_PROXY_COUNT = int(os.environ.get("ALLAUTH_TRUSTED_PROXY_COUNT", "0"))
+
+if HTTPS:
+    SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+    SECURE_SSL_REDIRECT = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_HSTS_SECONDS = 3600  # 1 hora; aumentamos depois que tudo estiver estável
+    ACCOUNT_DEFAULT_HTTP_PROTOCOL = "https"
+
 
 # Application definition
 
