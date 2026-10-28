@@ -39,6 +39,12 @@ if HTTPS:
     SECURE_HSTS_SECONDS = 3600  # 1 hora; aumentamos depois que tudo estiver estável
     ACCOUNT_DEFAULT_HTTP_PROTOCOL = "https"
 
+# O Render define esta variável sozinho com o endereço do site
+RENDER_HOST = os.environ.get("RENDER_EXTERNAL_HOSTNAME")
+if RENDER_HOST:
+    ALLOWED_HOSTS.append(RENDER_HOST)
+    CSRF_TRUSTED_ORIGINS.append(f"https://{RENDER_HOST}")
+
 
 # Application definition
 
