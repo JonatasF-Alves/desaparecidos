@@ -55,6 +55,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'cloudinary_storage',
+    'cloudinary',
     'casos',
     'analises',
     'allauth',
@@ -178,3 +180,15 @@ MEDIA_ROOT = BASE_DIR / 'media'
 
 TURNSTILE_SITE_KEY = os.environ["TURNSTILE_SITE_KEY"]
 TURNSTILE_SECRET_KEY = os.environ["TURNSTILE_SECRET_KEY"]
+
+# Fotos na nuvem (Cloudinary): só liga se as variáveis existirem
+if os.environ.get("CLOUDINARY_CLOUD_NAME"):
+    CLOUDINARY_STORAGE = {
+        "CLOUD_NAME": os.environ["CLOUDINARY_CLOUD_NAME"],
+        "API_KEY": os.environ["CLOUDINARY_API_KEY"],
+        "API_SECRET": os.environ["CLOUDINARY_API_SECRET"],
+    }
+    STORAGES = {
+        "default": {"BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage"},
+        "staticfiles": {"BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"},
+    }
