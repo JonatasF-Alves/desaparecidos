@@ -8,6 +8,8 @@ from .models import Caso, Denuncia
 
 LIMITE_CASOS_POR_DIA = 2
 
+TAMANHO_MAX_FOTO = 5 * 1024 * 1024  # 5 MB, em bytes
+FORMATOS_FOTO = {"image/jpeg", "image/png", "image/webp"}
 
 class CasoForm(forms.ModelForm):
     class Meta:
@@ -21,6 +23,16 @@ class CasoForm(forms.ModelForm):
         self.usuario = usuario
         self.fields["cf-turnstile-response"] = TurnstileField()
 
+    def clean_foto(self):
+        foto = self.cleaned_data.get("foto")
+        # só valida upload novo (arquivo já salvo não tem content_type)
+        if foto and hasattr(foto, "content_type"):
+            if foto.content_type not in FORMATOS_FOTO:
+                raise forms.ValidationError("Envie a foto em JPEG, PNG ou WebP.")
+            if foto.size > TAMANHO_MAX_FOTO:
+                raise forms.ValidationError("A foto pode ter no máximo 5 MB.")
+        return foto
+        
     def clean(self):
         cleaned_data = super().clean()
         
