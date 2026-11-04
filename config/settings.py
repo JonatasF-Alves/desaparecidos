@@ -203,3 +203,10 @@ if os.environ.get("CLOUDINARY_CLOUD_NAME"):
         "default": {"BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage"},
         "staticfiles": {"BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"},
     }
+
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.db.DatabaseCache",
+        "LOCATION": "cache_limites",
+    }
+}
