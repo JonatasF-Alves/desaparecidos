@@ -61,6 +61,7 @@ INSTALLED_APPS = [
     'analises',
     'allauth',
     'allauth.account',
+    'anymail',
 ]
 
 MIDDLEWARE = [
@@ -152,16 +153,13 @@ STATIC_ROOT = BASE_DIR / "staticfiles"
 # Email
 # https://docs.djangoproject.com/en/6.1/topics/email/#topic-email-configuration
 
-EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER")
+BREVO_API_KEY = os.environ.get("BREVO_API_KEY")
 
-if EMAIL_HOST_USER:
-    # Brevo configurado: envia e-mail de verdade
-    EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
-    EMAIL_HOST = "smtp-relay.brevo.com"
-    EMAIL_PORT = 587
-    EMAIL_USE_TLS = True
-    EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD")
-    DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL", EMAIL_HOST_USER)
+if BREVO_API_KEY:
+    # Brevo configurado: envia e-mail de verdade pela API (HTTPS, porta 443)
+    EMAIL_BACKEND = "anymail.backends.brevo.EmailBackend"
+    ANYMAIL = {"BREVO_API_KEY": BREVO_API_KEY}
+    DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL", "")
 else:
     # Sem Brevo: e-mails aparecem no terminal
     EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
