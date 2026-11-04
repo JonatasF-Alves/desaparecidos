@@ -1,107 +1,97 @@
-# Pessoas Desaparecidas
+# Desaparecidos
 
-Site para ajudar famílias a divulgar o desaparecimento de pessoas e facilitar o compartilhamento dos casos nas redes sociais. O projeto também traz um painel de estatísticas, feito com Pandas e Plotly, que mostra a situação dos casos a partir de dados agregados.
+Plataforma web para divulgar casos de pessoas desaparecidas, com moderação, denúncia de abuso e um painel de análise de dados agregados.
 
-> **Status:** projeto em desenvolvimento (MVP), rodando localmente. Ainda não está publicado na internet.
+> **Projeto de portfólio.** Os casos exibidos na demonstração são **fictícios**. O site não está aberto a casos reais.
+
+**Demonstração:** https://desaparecidos-xtff.onrender.com *(hospedagem gratuita: a primeira visita pode demorar alguns segundos enquanto o serviço acorda)*
+
+## O problema
+
+Divulgar um desaparecimento rápido ajuda, mas um site aberto a qualquer pessoa também atrai abuso: casos falsos, spam e exposição indevida de dados. O objetivo do projeto foi construir algo útil **e** defensável, pensando em segurança, moderação e privacidade desde o início, e não depois.
 
 ## Funcionalidades
 
-- Lista de casos com busca por nome ou cidade e paginação
-- Página de cada caso, com foto, dados e contato da família
-- Botão para compartilhar o caso no WhatsApp
-- Formulário de cadastro com upload de foto e número do B.O.
-- Moderação: todo cadastro novo só aparece no site depois de aprovado no painel administrativo
-- Painel de estatísticas com casos por cidade, por mês e por faixa etária, taxa de resolução e tempo médio até a pessoa ser encontrada
-- Comando que cria casos fictícios para testar o site
+- Cadastro de casos com foto, descrição, local, data e contato
+- Lista, página de detalhe e busca
+- Contas de usuário com verificação de e-mail obrigatória e área "Meus casos"
+- **Moderação:** todo caso só aparece depois de aprovado por um administrador, e o número do B.O. é obrigatório
+- Botão "marcar como encontrado" (somente o dono do caso)
+- **Denúncia** de casos: uma por pessoa, e o caso sai do ar automaticamente ao atingir um limite
+- **Painel de análises** (`/painel/`) com Pandas e Plotly, usando apenas dados agregados
 
-## Tecnologias
+## Decisões de segurança
 
-- **Python** e **Django** (back end, banco de dados e painel administrativo)
-- **SQLite** (banco de dados em desenvolvimento)
-- **Pandas** e **Plotly** (análise de dados e gráficos)
-- **HTML** e **CSS** (templates do Django)
-- **Pillow** (upload de imagens)
-- **uv** (gerenciamento de ambiente e dependências)
+Em linhas gerais, sem detalhes que facilitem ataque:
 
-## Como rodar
+- CAPTCHA (Cloudflare Turnstile) no cadastro, no envio de casos e nas denúncias
+- Limites de uso por conta e por endereço IP, com o IP real do visitante lido do cabeçalho confiável da Cloudflare (e não do `X-Forwarded-For`, que pode ser forjado)
+- Contagem dos limites em cache no banco de dados, para não se perder a cada reinício do serviço
+- Validação de upload no servidor: tamanho máximo e formatos de imagem permitidos
+- Segredos somente em variáveis de ambiente, nunca no código nem no Git
+- Fotos e banco de dados de desenvolvimento fora do controle de versão
 
-Pré-requisitos: Python 3.12 ou superior e o [uv](https://docs.astral.sh/uv/) instalado.
+## Stack
+
+| Camada | Tecnologia |
+|---|---|
+| Backend | Python 3.12, Django 6.1 |
+| Autenticação | django-allauth |
+| Frontend | Templates Django (HTML e CSS) |
+| Análises | Pandas, Plotly |
+| Banco | SQLite (local) e PostgreSQL no Neon (produção) |
+| Fotos | Cloudinary (via django-cloudinary-storage) |
+| E-mail | Brevo, pela API (django-anymail) |
+| Deploy | Render (gunicorn + WhiteNoise) |
+| Ambiente | uv |
+
+## Decisões técnicas e aprendizados
+
+- **Armazenamento de fotos:** descartei serviços com cobrança incerta ou exigência de cartão e escolhi o Cloudinary no plano gratuito. O bloco de configuração só é ativado se as variáveis existirem, então o projeto roda localmente com o disco.
+- **Checagem de existência da foto:** testei `storage.exists()` por foto, mas com armazenamento na nuvem cada chamada vira uma requisição de rede, o que deixa listas lentas. A lista usa apenas a verificação do campo e mostra um quadro "Foto indisponível".
+- **E-mail em produção:** o SMTP do Brevo deu *timeout* no Render, que bloqueia as portas SMTP no plano gratuito. Troquei para a API do Brevo, que usa HTTPS.
+- **IP do cliente atrás de proxy:** sem configuração, o allauth enxergava o IP interno do proxy, e todos os visitantes dividiam o mesmo contador de limite. Validei com uma página de depuração temporária, depois removida.
+- **Dois bancos separados:** o banco local (SQLite) e o de produção (Neon) são independentes. Um caso criado localmente não existe no site no ar.
+
+## Rodando localmente
+
+Requisitos: Python 3.12 e [uv](https://docs.astral.sh/uv/).
 
 ```bash
-git clone https://github.com/JonatasF-Alves/desaparecidos.git
+git clone <url-do-repositorio>
 cd desaparecidos
-
 uv venv
-source .venv/bin/activate
 uv pip install -r requirements.txt
-
-python manage.py migrate
-python manage.py createsuperuser
-python manage.py popular_exemplos
-python manage.py runserver
+cp .env.example .env   # preencha com os seus valores
+uv run python manage.py migrate
+uv run python manage.py createcachetable
+uv run python manage.py createsuperuser
+uv run python manage.py runserver
 ```
 
-Depois abra:
+Variáveis de ambiente usadas (valores nunca vão para o Git):
 
-| Endereço | O que é |
-|---|---|
-| http://127.0.0.1:8000/ | Lista de casos |
-| http://127.0.0.1:8000/cadastrar/ | Cadastro de um caso |
-| http://127.0.0.1:8000/painel/ | Estatísticas |
-| http://127.0.0.1:8000/admin/ | Moderação (login do superusuário) |
+`DJANGO_SECRET_KEY`, `DJANGO_DEBUG`, `DJANGO_ALLOWED_HOSTS`, `DJANGO_HTTPS`, `DJANGO_CSRF_TRUSTED_ORIGINS`, `DATABASE_URL` (opcional, usa SQLite se ausente), `TURNSTILE_SITE_KEY`, `TURNSTILE_SECRET_KEY`, `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET`, `BREVO_API_KEY`, `DEFAULT_FROM_EMAIL`, `ALLAUTH_TRUSTED_CLIENT_IP_HEADER`.
 
-O comando `popular_exemplos` cria 12 casos **fictícios** para você ver o site funcionando. Para apagá-los, use `python manage.py popular_exemplos --limpar`.
-
-## Estrutura do projeto
+## Estrutura
 
 ```
-├── config/              # configurações e rotas principais
-├── casos/               # cadastro, lista, detalhe e moderação
-│   ├── models.py        # modelo Caso
-│   ├── views.py         # lógica das páginas
-│   ├── forms.py         # formulário de cadastro
-│   ├── admin.py         # painel de moderação
-│   └── templates/
-├── analises/            # painel de estatísticas (Pandas + Plotly)
-│   └── views.py
-├── templates/base.html  # layout comum e CSS
-└── manage.py
+config/    configurações do projeto e rotas
+casos/     cadastro, lista, detalhe, busca, moderação, denúncia
+analises/  painel de análises (Pandas + Plotly)
+templates/ páginas HTML
+build.sh   script de build do Render
 ```
-
-## Privacidade e moderação
-
-O site lida com informações de pessoas reais, então algumas decisões foram tomadas desde o início:
-
-- Nenhum cadastro é publicado sem aprovação de um moderador.
-- O número do B.O. é obrigatório, para ajudar a verificar os casos.
-- As estatísticas usam apenas totais, nunca dados de uma pessoa específica.
-- O banco de dados e as fotos enviadas ficam fora do repositório (`.gitignore`).
-- Os dados de exemplo são todos fictícios. **Não use dados reais para testar.**
-
-## Antes de publicar na internet
-
-Esta versão é para desenvolvimento. Para um deploy real ainda é preciso:
-
-- Definir um `SECRET_KEY` próprio por variável de ambiente e desligar o `DEBUG`
-- Configurar `ALLOWED_HOSTS`
-- Trocar o SQLite por PostgreSQL
-- Guardar as fotos em um serviço externo (por exemplo, AWS S3)
-- Escrever uma política de privacidade (LGPD) e definir quem vai moderar os cadastros
 
 ## Próximos passos
 
-- [ ] Botão para marcar um caso como encontrado
-- [ ] Botão para denunciar um cadastro
-- [ ] Mapa de calor com os locais de desaparecimento
-- [ ] Contas de usuário, para cada família gerenciar o próprio caso
-- [ ] Deploy
-
-## Sobre o desenvolvimento
-
-Este projeto foi desenvolvido com apoio de IA (Claude, da Anthropic) na estrutura e no código inicial. As alterações, os testes e a evolução do projeto são feitos por mim.
+- Testes automatizados (os arquivos de teste ainda estão vazios)
+- Mapa de calor com Folium e mais métricas no painel
+- Backups do banco e moderação que escale
+- Domínio próprio com autenticação de e-mail (SPF/DKIM/DMARC), para melhorar a entrega
+- Antes de qualquer uso com casos reais: termos de uso, política de privacidade e adequação à LGPD, com revisão jurídica (envolve dados de menores)
 
 ## Autor
 
-**Jonatas Fernandes Alves**
-Estudante de Engenharia de Software, em busca de estágio na área de análise de dados.
+**Jonatas Fernandes Alves**: estudante de Engenharia de Software, em busca de estágio em Análise de Dados.
 GitHub: [@JonatasF-Alves](https://github.com/JonatasF-Alves)
